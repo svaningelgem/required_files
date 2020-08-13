@@ -9,7 +9,7 @@ install:
   - pip list installed
 
 script:
-  - pyb --debug --verbose run_unit_tests
+  - pyb --environment ci --debug --verbose analyze run_unit_tests install
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
