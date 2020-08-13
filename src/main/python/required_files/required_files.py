@@ -31,17 +31,16 @@ class Required(ABC):
 class RequiredCommand(Required):
     """Checks if we can execute a certain command."""
 
-    def __init__(self, command, *args):
+    def __init__(self, *command):
         self.command = command
-        self.args = args
 
     def check(self) -> str:
         try:
-            subprocess.run(self.command, *self.args, capture_output=True)
+            subprocess.run(*self.command)
         except Exception as e:
             raise ValueError(str(e))
 
-        return self.command
+        return self.command[0]
 
 
 class RequiredFile(Required):
