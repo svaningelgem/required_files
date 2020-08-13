@@ -3,7 +3,7 @@ from pathlib import Path
 from pybuilder.cli import main
 from pybuilder.core import use_plugin, init, Author
 
-version = '1.0.0'
+version = '1.0.1'
 url = 'https://github.com/svaningelgem/required_files'
 license = 'MIT'
 authors = [Author("Steven 'KaReL' Van Ingelgem", 'steven@vaningelgem.be')]
