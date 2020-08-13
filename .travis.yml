@@ -8,6 +8,7 @@ python:
 
 install:
   - pip install pybuilder coverage
+  - pip list installed
 
 script:
   - pyb --debug --verbose run_unit_tests
