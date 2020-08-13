@@ -1,5 +1,5 @@
 from pathlib import Path
-from tempfile import TemporaryDirectory, _TemporaryFileWrapper
+from tempfile import TemporaryDirectory
 from unittest import TestCase, main, mock, skipIf
 
 from common import URL_RAW, URL_UNKNOWN, TEST_STRING
@@ -94,7 +94,6 @@ class TestRequiredFile(TestCase):
 
     def test_good_download_to_tmpfile(self):
         fp = RequiredFile._download_to_tmpfile(URL_RAW)
-        self.assertIsInstance(fp, _TemporaryFileWrapper)
         self.assertEqual(fp.read(), TEST_STRING.encode('utf8'))
         fp.close()
 
