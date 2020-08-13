@@ -5,8 +5,10 @@ from required_files import RequiredCommand
 
 class TestRequiredCommand(TestCase):
     def test_command_is_there(self):
-        COMMAND_TO_CHECK = 'python --version'
-        self.assertEqual(RequiredCommand(COMMAND_TO_CHECK).check(), COMMAND_TO_CHECK)
+        self.assertEqual(
+            RequiredCommand('python', '--version').check(),
+            'python'
+        )
 
     def test_command_is_not_there(self):
         with self.assertRaises(ValueError):
