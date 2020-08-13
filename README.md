@@ -7,7 +7,8 @@ Small sample:
 ```
 from required_files import RequiredCommand
  
-java_exe = RequiredCommand('java').check()
+java_exe = RequiredCommand('java', '-version').check()
+python_exe = RequiredCommand('python', '--version').check()
 ```
 
 

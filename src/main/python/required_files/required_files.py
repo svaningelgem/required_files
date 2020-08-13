@@ -36,7 +36,7 @@ class RequiredCommand(Required):
 
     def check(self) -> str:
         try:
-            subprocess.run(*self.command)
+            subprocess.run(self.command)
         except Exception as e:
             raise ValueError(str(e))
 
