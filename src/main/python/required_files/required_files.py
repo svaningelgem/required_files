@@ -3,6 +3,7 @@ import re
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
+from logging import getLogger
 from os import PathLike
 from pathlib import Path
 from typing import BinaryIO, Union
@@ -17,9 +18,13 @@ except ImportError:  # pragma: no cover
     FileAdapter = None
 
 
+LOGGER = getLogger('required-files')
+LOGGER.setLevel('INFO')
+
+
 class Required(ABC):
     @abstractmethod
-    def check(self) -> str:
+    def check(self) -> Union[str, Path]:
         """
         This method fires of the downloading/checking.
         It should be implemented in any class that is considered 'Required'
@@ -34,7 +39,7 @@ class RequiredCommand(Required):
     def __init__(self, *command):
         self.command = command
 
-    def check(self) -> str:
+    def check(self) -> Union[str, Path]:
         try:
             subprocess.run(self.command)
         except Exception as e:
@@ -84,9 +89,9 @@ class RequiredFile(Required):
                 save_to.write(r.content)
 
     def _return_result(self):
-        return os.path.abspath(self.filename)
+        return Path(self.filename).absolute()
 
-    def check(self) -> str:
+    def check(self) -> Union[str, Path]:
         if not self._is_file_present():
             self._download(self.url, self.filename)
 
@@ -171,7 +176,7 @@ class RequiredZipFile(ZipfileMixin, RequiredFile):
         self._zip_init(file_to_check)
         self.skip_initial_dir = skip_initial_dir
 
-    def check(self) -> str:
+    def check(self) -> Union[str, Path]:
         if not self._is_file_present():
             self._process_zip(
                 self._download_to_tmpfile(self.url), into_dir=self.filename, skip_initial_dir=self.skip_initial_dir
@@ -185,67 +190,71 @@ class RequiredLatestFromWebMixin(ABC):
     def _get_real_url(self, soup: bs4.BeautifulSoup):
         """Returns the real URL based on a parsed HTML file."""
 
+    @abstractmethod
+    def _should_i_skip_this_filename(self, filename):
+        """Checks if the filename is OK to use."""
+
     def figure_out_url(self, url):
         r = requests.get(url)
         soup = bs4.BeautifulSoup(r.content, features='lxml')
         return self._get_real_url(soup)
 
-    def check(self) -> str:
+    def check(self) -> Union[str, Path]:
         if not self._is_file_present():
             self.url = self.figure_out_url(self.url)
 
         return super().check()
 
 
-class BitBucketURLRetrieverMixin(ABC):
-    @abstractmethod
-    def _should_i_skip_this_filename(self, filename):
-        """Checks if the filename is OK to use."""
-
+class BitBucketURLRetrieverMixin:
     def _get_real_url(self, soup: bs4.BeautifulSoup):
         for entry in soup.select('tr.iterable-item td.name a'):
             filename = entry.get_text().strip()
             if self._should_i_skip_this_filename(filename):
                 continue
 
-            return urljoin(self.url, entry.get('href'))
+            new_url = urljoin(self.url, entry.get('href'))
+            LOGGER.info(f'Found new BitBucket url: {new_url}')
+            return new_url
 
-        raise ValueError("Couldn't find an URLzip file for this release??")
-
-
-class RequiredLatestBitbucketFile(RequiredLatestFromWebMixin, BitBucketURLRetrieverMixin, RequiredFile):
-    def __init__(self, url, save_as, file_regex):
-        super().__init__(url, save_as)
-        self.file_regex = re.compile(file_regex)
-
-    def _should_i_skip_this_filename(self, filename):
-        return self.file_regex.match(filename)
+        raise ValueError("Couldn't find an URL for this release??")
 
 
-class GithubURLRetrieverMixin(ABC):
-    @abstractmethod
-    def _should_i_skip_this_filename(self, filename):
-        """Checks if the filename is OK to use."""
-        return False
-
+class GithubURLRetrieverMixin:
     def _get_real_url(self, soup: bs4.BeautifulSoup):
         for details in soup.select('details div.Box div.d-flex'):
             span = details.select('span')
             if not span:
                 continue
+
             filename = span[0].get_text().strip()
             if self._should_i_skip_this_filename(filename):
                 continue
 
-            return urljoin(self.url, details.select('a')[0].get('href'))
+            new_url = urljoin(self.url, details.select('a')[0].get('href'))
+            LOGGER.info(f'Found new Github url: {new_url}')
+            return new_url
 
-        raise ValueError("Couldn't find zip file for this release??")
+        raise ValueError("Couldn't find github url for this release??")
 
 
-class RequiredLatestGithubZipFile(RequiredLatestFromWebMixin, GithubURLRetrieverMixin, RequiredZipFile):
+class RequiredLatestBitbucketFile(BitBucketURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredFile):
     """
-    This method fetches a ZIP file from Github and extracts it.
+    This class fetches a file from Bitbucket according to a pattern
     """
+    def __init__(self, url, save_as, file_regex):
+        super().__init__(url, save_as)
+        self.file_regex = re.compile(file_regex)
 
     def _should_i_skip_this_filename(self, filename):
-        return not filename.lower().endswith('.zip')
+        return not self.file_regex.match(filename)
+
+
+class RequiredLatestGithubZipFile(GithubURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredZipFile):
+    """
+    This class fetches a ZIP file from Github and extracts it.
+    """
+    def _should_i_skip_this_filename(self, filename):
+        retVal = not filename.lower().endswith('.zip')
+        LOGGER.debug(f'RequiredLatestGithubZipFile._should_i_skip_this_filename:: {retVal}')
+        return retVal
