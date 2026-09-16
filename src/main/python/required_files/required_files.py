@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import BinaryIO
 from urllib.parse import urljoin
 
 import bs4
@@ -18,13 +18,13 @@ except ImportError:  # pragma: no cover
     FileAdapter = None
 
 
-LOGGER = getLogger('required-files')
-LOGGER.setLevel('INFO')
+LOGGER = getLogger("required-files")
+LOGGER.setLevel("INFO")
 
 
 class Required(ABC):
     @abstractmethod
-    def check(self) -> Union[str, Path]:
+    def check(self) -> str | Path:
         """
         This method fires of the downloading/checking.
         It should be implemented in any class that is considered 'Required'
@@ -39,7 +39,7 @@ class RequiredCommand(Required):
     def __init__(self, *command):
         self.command = command
 
-    def check(self) -> Union[str, Path]:
+    def check(self) -> str | Path:
         try:
             subprocess.run(self.command)
         except Exception as e:
@@ -49,7 +49,7 @@ class RequiredCommand(Required):
 
 
 class RequiredFile(Required):
-    def __init__(self, url: str, save_as: Union[str, os.PathLike]):
+    def __init__(self, url: str, save_as: str | os.PathLike):
         self.url = url
         self.filename = Path(save_as)
         self._create_directories()
@@ -62,7 +62,7 @@ class RequiredFile(Required):
 
     @staticmethod
     def _download_to_tmpfile(url: str):
-        tmp_fp = tempfile.TemporaryFile('wb+')
+        tmp_fp = tempfile.TemporaryFile("wb+")
         try:
             RequiredFile._download(url, tmp_fp)
         except ValueError:
@@ -73,17 +73,17 @@ class RequiredFile(Required):
         return tmp_fp
 
     @staticmethod
-    def _download(url, save_to: Union[str, os.PathLike, BinaryIO]) -> None:
+    def _download(url, save_to: str | os.PathLike | BinaryIO) -> None:
         with requests.Session() as s:
             if FileAdapter:
-                s.mount('file://', FileAdapter())
+                s.mount("file://", FileAdapter())
 
             r = s.get(url)
             if not r:
-                raise ValueError(r.content.decode('utf8'))
+                raise ValueError(r.content.decode("utf8"))
 
-            if isinstance(save_to, str) or isinstance(save_to, PathLike):
-                with open(save_to, 'wb') as fp:
+            if isinstance(save_to, (str, PathLike)):
+                with open(save_to, "wb") as fp:
                     fp.write(r.content)
             else:
                 save_to.write(r.content)
@@ -91,7 +91,7 @@ class RequiredFile(Required):
     def _return_result(self):
         return Path(self.filename).absolute()
 
-    def check(self) -> Union[str, Path]:
+    def check(self) -> str | Path:
         if not self._is_file_present():
             self._download(self.url, self.filename)
 
@@ -110,7 +110,7 @@ class ZipfileMixin:
         Checks if the first reference in the zip file is the initial dir for ALL the files?
         """
         initial_dir = all_files[0]
-        if initial_dir[-1] != '/':  # First entry is NOT a dir?
+        if initial_dir[-1] != "/":  # First entry is NOT a dir?
             return False
 
         initial_dir_l = len(initial_dir)
@@ -140,11 +140,11 @@ class ZipfileMixin:
                 for filename in all_files[1:]:
                     tgt = into_dir / filename[initial_dir_l:]
 
-                    if filename[-1] == '/':
+                    if filename[-1] == "/":
                         os.makedirs(tgt, exist_ok=True)
                     else:
-                        with zip_ref.open(filename, mode='r') as zip_fp:
-                            with open(tgt, mode='wb') as fp:
+                        with zip_ref.open(filename, mode="r") as zip_fp:
+                            with open(tgt, mode="wb") as fp:
                                 fp.write(zip_fp.read())
             else:
                 zip_ref.extractall(into_dir)
@@ -176,7 +176,7 @@ class RequiredZipFile(ZipfileMixin, RequiredFile):
         self._zip_init(file_to_check)
         self.skip_initial_dir = skip_initial_dir
 
-    def check(self) -> Union[str, Path]:
+    def check(self) -> str | Path:
         if not self._is_file_present():
             self._process_zip(
                 self._download_to_tmpfile(self.url), into_dir=self.filename, skip_initial_dir=self.skip_initial_dir
@@ -196,10 +196,10 @@ class RequiredLatestFromWebMixin(ABC):
 
     def figure_out_url(self, url):
         r = requests.get(url)
-        soup = bs4.BeautifulSoup(r.content, features='lxml')
+        soup = bs4.BeautifulSoup(r.content, features="lxml")
         return self._get_real_url(soup)
 
-    def check(self) -> Union[str, Path]:
+    def check(self) -> str | Path:
         if not self._is_file_present():
             self.url = self.figure_out_url(self.url)
 
@@ -208,13 +208,13 @@ class RequiredLatestFromWebMixin(ABC):
 
 class BitBucketURLRetrieverMixin:
     def _get_real_url(self, soup: bs4.BeautifulSoup):
-        for entry in soup.select('tr.iterable-item td.name a'):
+        for entry in soup.select("tr.iterable-item td.name a"):
             filename = entry.get_text().strip()
             if self._should_i_skip_this_filename(filename):
                 continue
 
-            new_url = urljoin(self.url, entry.get('href'))
-            LOGGER.info(f'Found new BitBucket url: {new_url}')
+            new_url = urljoin(self.url, entry.get("href"))
+            LOGGER.info(f"Found new BitBucket url: {new_url}")
             return new_url
 
         raise ValueError("Couldn't find an URL for this release??")
@@ -222,8 +222,8 @@ class BitBucketURLRetrieverMixin:
 
 class GithubURLRetrieverMixin:
     def _get_real_url(self, soup: bs4.BeautifulSoup):
-        for details in soup.select('details div.Box div.d-flex'):
-            span = details.select('span')
+        for details in soup.select("details div.Box div.d-flex"):
+            span = details.select("span")
             if not span:
                 continue
 
@@ -231,8 +231,8 @@ class GithubURLRetrieverMixin:
             if self._should_i_skip_this_filename(filename):
                 continue
 
-            new_url = urljoin(self.url, details.select('a')[0].get('href'))
-            LOGGER.info(f'Found new Github url: {new_url}')
+            new_url = urljoin(self.url, details.select("a")[0].get("href"))
+            LOGGER.info(f"Found new Github url: {new_url}")
             return new_url
 
         raise ValueError("Couldn't find github url for this release??")
@@ -242,6 +242,7 @@ class RequiredLatestBitbucketFile(BitBucketURLRetrieverMixin, RequiredLatestFrom
     """
     This class fetches a file from Bitbucket according to a pattern
     """
+
     def __init__(self, url, save_as, file_regex):
         super().__init__(url, save_as)
         self.file_regex = re.compile(file_regex)
@@ -254,7 +255,8 @@ class RequiredLatestGithubZipFile(GithubURLRetrieverMixin, RequiredLatestFromWeb
     """
     This class fetches a ZIP file from Github and extracts it.
     """
+
     def _should_i_skip_this_filename(self, filename):
-        retVal = not filename.lower().endswith('.zip')
-        LOGGER.debug(f'RequiredLatestGithubZipFile._should_i_skip_this_filename:: {retVal}')
+        retVal = not filename.lower().endswith(".zip")
+        LOGGER.debug(f"RequiredLatestGithubZipFile._should_i_skip_this_filename:: {retVal}")
         return retVal
