@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase, main, mock
 
 from common import (
-    TESTFILE_NAME,
     TEST_STRING,
+    TESTFILE_NAME,
     URL_ZIP_WITH_DIR_STRUCTURE,
     URL_ZIP_WITH_MULTIPLE_DIRS,
     URL_ZIP_WITH_SINGLE_DIR,
@@ -52,7 +52,7 @@ class TestRequiredZipFile(TestCase):
                     URL_ZIP_WITH_SINGLE_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
                 ).check()
             )
-            / 'dir1'
+            / "dir1"
             / TESTFILE_NAME
         )
         self.assertTrue(expected_file.exists())
@@ -76,8 +76,8 @@ class TestRequiredZipFile(TestCase):
                 URL_ZIP_WITH_MULTIPLE_DIRS, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
             ).check()
         )
-        file1 = expected_file / 'dir1' / TESTFILE_NAME
-        file2 = expected_file / 'dir2' / TESTFILE_NAME
+        file1 = expected_file / "dir1" / TESTFILE_NAME
+        file2 = expected_file / "dir2" / TESTFILE_NAME
         self.assertTrue(file1.exists())
         self.assertEqual(file1.read_text(), TEST_STRING)
         self.assertTrue(file2.exists())
@@ -89,8 +89,8 @@ class TestRequiredZipFile(TestCase):
                 URL_ZIP_WITH_MULTIPLE_DIRS, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=True
             ).check()
         )
-        file1 = expected_file / 'dir1' / TESTFILE_NAME
-        file2 = expected_file / 'dir2' / TESTFILE_NAME
+        file1 = expected_file / "dir1" / TESTFILE_NAME
+        file2 = expected_file / "dir2" / TESTFILE_NAME
         self.assertTrue(file1.exists())
         self.assertEqual(file1.read_text(), TEST_STRING)
         self.assertTrue(file2.exists())
@@ -102,8 +102,8 @@ class TestRequiredZipFile(TestCase):
                 URL_ZIP_WITH_DIR_STRUCTURE, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
             ).check()
         )
-        file1 = p / 'dir1' / TESTFILE_NAME
-        file2 = p / 'dir1/dir2' / TESTFILE_NAME
+        file1 = p / "dir1" / TESTFILE_NAME
+        file2 = p / "dir1/dir2" / TESTFILE_NAME
         self.assertTrue(file1.exists())
         self.assertTrue(file2.exists())
         self.assertEqual(file1.read_text(), TEST_STRING)
@@ -116,13 +116,13 @@ class TestRequiredZipFile(TestCase):
             ).check()
         )
         file1 = p / TESTFILE_NAME
-        file2 = p / 'dir2' / TESTFILE_NAME
+        file2 = p / "dir2" / TESTFILE_NAME
         self.assertTrue(file1.exists())
         self.assertTrue(file2.exists())
         self.assertEqual(file1.read_text(), TEST_STRING)
         self.assertEqual(file2.read_text(), TEST_STRING)
 
-    @mock.patch('required_files.required_files.ZipfileMixin._process_zip')
+    @mock.patch("required_files.required_files.ZipfileMixin._process_zip")
     def test_when_file_is_present(self, process_zip):
         target_file = Path(self.tmp_dir.name) / TESTFILE_NAME
         target_file.touch()
@@ -138,8 +138,8 @@ class TestRequiredZipFile(TestCase):
         self.assertFalse(process_zip.called)
         self.assertEqual(expected_file, target_file)
         self.assertTrue(expected_file.exists())
-        self.assertEqual(expected_file.read_text(), '')
+        self.assertEqual(expected_file.read_text(), "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
