@@ -1,0 +1,40 @@
+[project]
+name = "required_files"
+version = "1.0.2"
+description = "Simple but effective checking if required externals are present."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Steven 'KaReL' Van Ingelgem", email = "steven@vaningelgem.be" }]
+requires-python = ">=3.9"
+keywords = ["required files", "github", "bitbucket", "zip"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "BeautifulSoup4",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/svaningelgem/required_files"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/main/python/required_files"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/unittest/python"]
+python_files = ["*_tests.py"]
+pythonpath = ["src/main/python", "src/unittest/python"]
