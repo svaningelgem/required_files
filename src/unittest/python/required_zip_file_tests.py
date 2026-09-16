@@ -25,7 +25,10 @@ class TestRequiredZipFile(TestCase):
         expected_file = (
             Path(
                 RequiredZipFile(
-                    URL_ZIP_WITHOUT_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
+                    URL_ZIP_WITHOUT_DIR,
+                    self.tmp_dir.name,
+                    file_to_check=TESTFILE_NAME,
+                    skip_initial_dir=False,
                 ).check()
             )
             / TESTFILE_NAME
@@ -37,7 +40,10 @@ class TestRequiredZipFile(TestCase):
         p = (
             Path(
                 RequiredZipFile(
-                    URL_ZIP_WITHOUT_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=True
+                    URL_ZIP_WITHOUT_DIR,
+                    self.tmp_dir.name,
+                    file_to_check=TESTFILE_NAME,
+                    skip_initial_dir=True,
                 ).check()
             )
             / TESTFILE_NAME
@@ -49,7 +55,10 @@ class TestRequiredZipFile(TestCase):
         expected_file = (
             Path(
                 RequiredZipFile(
-                    URL_ZIP_WITH_SINGLE_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
+                    URL_ZIP_WITH_SINGLE_DIR,
+                    self.tmp_dir.name,
+                    file_to_check=TESTFILE_NAME,
+                    skip_initial_dir=False,
                 ).check()
             )
             / "dir1"
@@ -62,7 +71,10 @@ class TestRequiredZipFile(TestCase):
         expected_file = (
             Path(
                 RequiredZipFile(
-                    URL_ZIP_WITH_SINGLE_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=True
+                    URL_ZIP_WITH_SINGLE_DIR,
+                    self.tmp_dir.name,
+                    file_to_check=TESTFILE_NAME,
+                    skip_initial_dir=True,
                 ).check()
             )
             / TESTFILE_NAME
@@ -73,7 +85,10 @@ class TestRequiredZipFile(TestCase):
     def test_multi_dir_zip_skip_dir_false(self):
         expected_file = Path(
             RequiredZipFile(
-                URL_ZIP_WITH_MULTIPLE_DIRS, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
+                URL_ZIP_WITH_MULTIPLE_DIRS,
+                self.tmp_dir.name,
+                file_to_check=TESTFILE_NAME,
+                skip_initial_dir=False,
             ).check()
         )
         file1 = expected_file / "dir1" / TESTFILE_NAME
@@ -86,7 +101,10 @@ class TestRequiredZipFile(TestCase):
     def test_multi_dir_zip_skip_dir_true(self):
         expected_file = Path(
             RequiredZipFile(
-                URL_ZIP_WITH_MULTIPLE_DIRS, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=True
+                URL_ZIP_WITH_MULTIPLE_DIRS,
+                self.tmp_dir.name,
+                file_to_check=TESTFILE_NAME,
+                skip_initial_dir=True,
             ).check()
         )
         file1 = expected_file / "dir1" / TESTFILE_NAME
@@ -99,7 +117,10 @@ class TestRequiredZipFile(TestCase):
     def test_structured_dir_zip_skip_dir_false(self):
         p = Path(
             RequiredZipFile(
-                URL_ZIP_WITH_DIR_STRUCTURE, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
+                URL_ZIP_WITH_DIR_STRUCTURE,
+                self.tmp_dir.name,
+                file_to_check=TESTFILE_NAME,
+                skip_initial_dir=False,
             ).check()
         )
         file1 = p / "dir1" / TESTFILE_NAME
@@ -112,7 +133,10 @@ class TestRequiredZipFile(TestCase):
     def test_structured_dir_zip_skip_dir_true(self):
         p = Path(
             RequiredZipFile(
-                URL_ZIP_WITH_DIR_STRUCTURE, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=True
+                URL_ZIP_WITH_DIR_STRUCTURE,
+                self.tmp_dir.name,
+                file_to_check=TESTFILE_NAME,
+                skip_initial_dir=True,
             ).check()
         )
         file1 = p / TESTFILE_NAME
@@ -130,7 +154,10 @@ class TestRequiredZipFile(TestCase):
         expected_file = (
             Path(
                 RequiredZipFile(
-                    URL_ZIP_WITHOUT_DIR, self.tmp_dir.name, file_to_check=TESTFILE_NAME, skip_initial_dir=False
+                    URL_ZIP_WITHOUT_DIR,
+                    self.tmp_dir.name,
+                    file_to_check=TESTFILE_NAME,
+                    skip_initial_dir=False,
                 ).check()
             )
             / TESTFILE_NAME

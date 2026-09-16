@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import re
 import subprocess
@@ -179,7 +181,9 @@ class RequiredZipFile(ZipfileMixin, RequiredFile):
     def check(self) -> str | Path:
         if not self._is_file_present():
             self._process_zip(
-                self._download_to_tmpfile(self.url), into_dir=self.filename, skip_initial_dir=self.skip_initial_dir
+                self._download_to_tmpfile(self.url),
+                into_dir=self.filename,
+                skip_initial_dir=self.skip_initial_dir,
             )
 
         return self._return_result()
@@ -238,7 +242,9 @@ class GithubURLRetrieverMixin:
         raise ValueError("Couldn't find github url for this release??")
 
 
-class RequiredLatestBitbucketFile(BitBucketURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredFile):
+class RequiredLatestBitbucketFile(
+    BitBucketURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredFile
+):
     """
     This class fetches a file from Bitbucket according to a pattern
     """
@@ -251,12 +257,16 @@ class RequiredLatestBitbucketFile(BitBucketURLRetrieverMixin, RequiredLatestFrom
         return not self.file_regex.match(filename)
 
 
-class RequiredLatestGithubZipFile(GithubURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredZipFile):
+class RequiredLatestGithubZipFile(
+    GithubURLRetrieverMixin, RequiredLatestFromWebMixin, RequiredZipFile
+):
     """
     This class fetches a ZIP file from Github and extracts it.
     """
 
     def _should_i_skip_this_filename(self, filename):
         retVal = not filename.lower().endswith(".zip")
-        LOGGER.debug(f"RequiredLatestGithubZipFile._should_i_skip_this_filename:: {retVal}")
+        LOGGER.debug(
+            f"RequiredLatestGithubZipFile._should_i_skip_this_filename:: {retVal}"
+        )
         return retVal

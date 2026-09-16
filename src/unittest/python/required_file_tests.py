@@ -75,7 +75,9 @@ class TestRequiredFile(TestCase):
         self.assertEqual(target.read_text(), TEST_STRING)
 
     def test__download_with_something_strange(self):
-        with self.assertRaises(AttributeError):  # 'NoneType' object has no attribute 'write'
+        with self.assertRaises(
+            AttributeError
+        ):  # 'NoneType' object has no attribute 'write'
             RequiredFile._download(URL_RAW, None)
 
     def test__download_with_bad_url(self):
