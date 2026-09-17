@@ -43,9 +43,9 @@ class RequiredCommand(Required):
 
     def check(self) -> str | Path:
         try:
-            subprocess.run(self.command)
-        except Exception as e:
-            raise ValueError(str(e))
+            subprocess.run(self.command, check=False)
+        except OSError as e:
+            raise ValueError(str(e)) from e
 
         return self.command[0]
 
@@ -64,7 +64,7 @@ class RequiredFile(Required):
 
     @staticmethod
     def _download_to_tmpfile(url: str):
-        tmp_fp = tempfile.TemporaryFile("wb+")
+        tmp_fp = tempfile.TemporaryFile("wb+")  # noqa: SIM115 - returned open; the caller closes it
         try:
             RequiredFile._download(url, tmp_fp)
         except ValueError:
@@ -145,9 +145,11 @@ class ZipfileMixin:
                     if filename[-1] == "/":
                         os.makedirs(tgt, exist_ok=True)
                     else:
-                        with zip_ref.open(filename, mode="r") as zip_fp:
-                            with open(tgt, mode="wb") as fp:
-                                fp.write(zip_fp.read())
+                        with (
+                            zip_ref.open(filename, mode="r") as zip_fp,
+                            open(tgt, mode="wb") as fp,
+                        ):
+                            fp.write(zip_fp.read())
             else:
                 zip_ref.extractall(into_dir)
 
