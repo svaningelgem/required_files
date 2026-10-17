@@ -38,3 +38,6 @@ packages = ["src/main/python/required_files"]
 testpaths = ["src/unittest/python"]
 python_files = ["*_tests.py"]
 pythonpath = ["src/main/python", "src/unittest/python"]
+
+[tool.uv]
+python-preference = "only-managed"
